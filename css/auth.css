@@ -1,0 +1,252 @@
+/* auth.css */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: 
+        opacity var(--transition-base),
+        visibility var(--transition-base);
+}
+
+.auth-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.auth-content {
+    position: relative;
+    background: var(--dark-elevated);
+    width: min(90%, 400px);
+    padding: 2.5rem 2rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-primary);
+    box-shadow: var(--shadow-base);
+    transform: scale(0.95);
+    transition: transform var(--transition-base);
+}
+
+.auth-modal.active .auth-content {
+    transform: scale(1);
+}
+
+.close-auth {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: color var(--transition-base);
+    line-height: 1;
+}
+
+.close-auth:hover,
+.close-auth:focus-visible {
+    color: var(--accent-primary);
+}
+
+.close-auth svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    display: block;
+}
+
+/* Вкладки */
+.auth-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 0.75rem;
+    background: none;
+    border: none;
+    color: color-mix(in srgb, var(--text-primary) 60%, white);
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    transition: 
+        color var(--transition-base),
+        background var(--transition-base);
+}
+
+.auth-tab::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--accent-primary);
+    transform: scaleX(0);
+    transition: transform var(--transition-base);
+}
+
+.auth-tab.active {
+    color: var(--text-inverted);
+}
+
+.auth-tab.active::after {
+    transform: scaleX(1);
+}
+
+/* Формы */
+.auth-form {
+    display: grid;
+    gap: 1.5rem;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    transition: 
+        opacity 0.4s ease,
+        height 0.4s ease;
+}
+
+.auth-form.active {
+    opacity: 1;
+    height: auto;
+    overflow: visible;
+}
+
+.form-group {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.875rem;
+    background: var(--dark-base);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    color: var(--text-inverted);
+    transition: 
+        border-color var(--transition-base),
+        box-shadow var(--transition-base);
+}
+
+.form-input:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 30%, transparent);
+    outline: none;
+}
+
+.form-error {
+    display: none;
+    color: #ff4d4d;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.form-input.invalid {
+    border-color: #ff4d4d;
+}
+
+.form-input.invalid + .form-error {
+    display: block;
+}
+
+.auth-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+    color: color-mix(in srgb, var(--text-primary) 60%, white);
+    font-size: 0.875rem;
+}
+
+.switch-auth {
+    color: var(--accent-primary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity var(--transition-base);
+}
+
+.switch-auth:hover {
+    opacity: 0.8;
+}
+
+/* Состояния загрузки */
+.auth-form .btn {
+    position: relative;
+    isolation: isolate;
+}
+
+.btn.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid;
+    border-color: 
+        var(--text-inverted)
+        var(--text-inverted)
+        var(--text-inverted)
+        transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: translateY(-50%) rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-modal,
+    .auth-content,
+    .auth-tab,
+    .form-input {
+        transition: none !important;
+    }
+    
+    .btn.loading::after {
+        animation: none;
+        border: none;
+        width: auto;
+        height: auto;
+        content: "Loading...";
+    }
+}
+
+/* Адаптивность */
+@media (max-width: 480px) {
+    .auth-content {
+        padding: 1.75rem 1.25rem;
+        border-radius: var(--radius-md);
+    }
+    
+    .auth-tab {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .form-input {
+        padding: 0.75rem;
+    }
+}

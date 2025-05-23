@@ -1,0 +1,43 @@
+<div class="auth-modal">
+    <div class="auth-content">
+        <button class="close-auth">&times;</button>
+        
+        <div class="auth-tabs">
+            <button class="auth-tab active" data-tab="login">Вход</button>
+            <button class="auth-tab" data-tab="register">Регистрация</button>
+        </div>
+
+        <!-- Форма входа -->
+        <form id="login-form" class="auth-form active">
+            <div class="form-group">
+                <label for="login-email">Email</label>
+                <input type="email" id="login-email" required>
+            </div>
+            <div class="form-group">
+                <label for="login-password">Пароль</label>
+                <input type="password" id="login-password" required>
+            </div>
+            <button type="submit" class="btn">Войти</button>
+            <div class="auth-footer">
+                Нет аккаунта? <a href="#" class="switch-to-register">Зарегистрируйтесь</a>
+            </div>
+        </form>
+
+        <!-- Форма регистрации -->
+        <form id="register-form" class="auth-form">
+            <div class="form-group">
+                <label for="register-name">Имя</label>
+                <input type="text" id="register-name" required>
+            </div>
+            <div class="form-group">
+                <label for="register-email">Email</label>
+                <input type="email" id="register-email" required>
+            </div>
+            <div class="form-group">
+                <label for="register-password">Пароль (мин. 6 символов)</label>
+                <input type="password" id="register-password" minlength="6" required>
+            </div>
+            <button type="submit" class="btn">Зарегистрироваться</button>
+        </form>
+    </div>
+</div>

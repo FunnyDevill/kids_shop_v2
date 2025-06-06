@@ -72,6 +72,7 @@ class ComponentLoader {
     this.initHeader();
     this.initAuthModal();
     this.initCartSidebar();
+    this.initFooter();
   }
 
   /**
@@ -208,6 +209,20 @@ class ComponentLoader {
   }
 
   /**
+
+   /**
+   * Инициализация шапки сайта
+   */
+  initFooter() {
+    const footer = document.getElementById('footer');
+    if (!footer) return;
+
+    this.setupMobileMenu(footer);
+    this.setupSearch(footer);
+  }
+
+  /**
+   
    * Настройка закрытия корзины
    */
   setupCartClose(cartSidebar) {

@@ -1,43 +1,131 @@
-<div class="auth-modal">
-    <div class="auth-content">
-        <button class="close-auth">&times;</button>
+<div id="auth-modal" class="auth-modal" aria-hidden="true" aria-labelledby="auth-modal-title">
+    <div class="auth-modal__overlay"></div>
+    
+    <div class="auth-modal__content" role="dialog" aria-modal="true">
+        <button class="auth-modal__close close-modal" aria-label="Закрыть окно авторизации">
+            &times;
+        </button>
         
-        <div class="auth-tabs">
-            <button class="auth-tab active" data-tab="login">Вход</button>
-            <button class="auth-tab" data-tab="register">Регистрация</button>
+        <h2 id="auth-modal-title" class="auth-modal__title">Авторизация</h2>
+        
+        <div class="auth-tabs" role="tablist">
+            <button 
+                class="auth-tab active" 
+                id="login-tab" 
+                role="tab" 
+                aria-selected="true" 
+                aria-controls="login-form"
+                data-tab="login"
+            >
+                Вход
+            </button>
+            <button 
+                class="auth-tab" 
+                id="register-tab" 
+                role="tab" 
+                aria-selected="false" 
+                aria-controls="register-form"
+                data-tab="register"
+            >
+                Регистрация
+            </button>
         </div>
 
         <!-- Форма входа -->
-        <form id="login-form" class="auth-form active">
+        <form 
+            id="login-form" 
+            class="auth-form active" 
+            role="tabpanel" 
+            aria-labelledby="login-tab"
+            data-form="login"
+        >
             <div class="form-group">
-                <label for="login-email">Email</label>
-                <input type="email" id="login-email" required>
+                <label for="login-email" class="form-label">Email</label>
+                <input 
+                    type="email" 
+                    id="login-email" 
+                    class="form-input" 
+                    required
+                    placeholder="example@mail.com"
+                    autocomplete="username"
+                >
             </div>
+            
             <div class="form-group">
-                <label for="login-password">Пароль</label>
-                <input type="password" id="login-password" required>
+                <label for="login-password" class="form-label">Пароль</label>
+                <input 
+                    type="password" 
+                    id="login-password" 
+                    class="form-input" 
+                    required
+                    placeholder="••••••••"
+                    autocomplete="current-password"
+                >
+                <a href="#forgot-password" class="forgot-password">Забыли пароль?</a>
             </div>
-            <button type="submit" class="btn">Войти</button>
-            <div class="auth-footer">
-                Нет аккаунта? <a href="#" class="switch-to-register">Зарегистрируйтесь</a>
+            
+            <button type="submit" class="btn btn--primary btn--block">
+                Войти
+            </button>
+            
+            <div class="auth-form__footer">
+                Нет аккаунта? 
+                <button type="button" class="auth-switch" data-switch-to="register">
+                    Зарегистрируйтесь
+                </button>
             </div>
         </form>
 
         <!-- Форма регистрации -->
-        <form id="register-form" class="auth-form">
+        <form 
+            id="register-form" 
+            class="auth-form" 
+            role="tabpanel" 
+            aria-labelledby="register-tab"
+            aria-hidden="true"
+            data-form="register"
+        >
             <div class="form-group">
-                <label for="register-name">Имя</label>
-                <input type="text" id="register-name" required>
+                <label for="register-name" class="form-label">Имя</label>
+                <input 
+                    type="text" 
+                    id="register-name" 
+                    class="form-input" 
+                    required
+                    placeholder="Ваше имя"
+                    autocomplete="name"
+                >
             </div>
+            
             <div class="form-group">
-                <label for="register-email">Email</label>
-                <input type="email" id="register-email" required>
+                <label for="register-email" class="form-label">Email</label>
+                <input 
+                    type="email" 
+                    id="register-email" 
+                    class="form-input" 
+                    required
+                    placeholder="example@mail.com"
+                    autocomplete="email"
+                >
             </div>
+            
             <div class="form-group">
-                <label for="register-password">Пароль (мин. 6 символов)</label>
-                <input type="password" id="register-password" minlength="6" required>
+                <label for="register-password" class="form-label">Пароль</label>
+                <input 
+                    type="password" 
+                    id="register-password" 
+                    class="form-input" 
+                    minlength="6" 
+                    required
+                    placeholder="Не менее 6 символов"
+                    autocomplete="new-password"
+                >
+                <div class="password-hint">Минимум 6 символов</div>
             </div>
-            <button type="submit" class="btn">Зарегистрироваться</button>
+            
+            <button type="submit" class="btn btn--primary btn--block">
+                Зарегистрироваться
+            </button>
         </form>
     </div>
 </div>

@@ -2,12 +2,14 @@ import { COMPONENTS } from './constants.js';
 import { Cart } from './cart.js';
 import { AuthService } from './auth.js';
 import { products } from './products.js';
+import { loadComponents } from './components.js';
 
 const App = {
   // Инициализация приложения
   async init() {
     try {
-      await this.loadComponents();
+      await loadComponents();
+      this.initModules();
       this.setupEventListeners();
       await this.checkAuthState();
       console.log('Приложение инициализировано');
@@ -17,55 +19,11 @@ const App = {
     }
   },
 
-  // Загрузка HTML-компонентов
-  async loadComponents() {
-    try {
-      const components = await Promise.allSettled([
-        this.loadComponent('header', '/partials/header.html'),
-        this.loadComponent(COMPONENTS.authModal, '/partials/auth-modal.html'),
-        this.loadComponent(COMPONENTS.cartSidebar, '/partials/cart-sidebar.html'),
-        this.loadComponent('footer', '/partials/footer.html')
-      ]);
-
-      components.forEach((result, index) => {
-        if (result.status === 'rejected') {
-          console.error(`Ошибка загрузки компонента ${index}:`, result.reason);
-        }
-      });
-
-      this.initModules();
-    } catch (error) {
-      console.error('Критическая ошибка загрузки компонентов:', error);
-      throw error;
-    }
-  },
-
-  // Загрузка отдельного компонента
-  async loadComponent(id, path) {
-    try {
-      const response = await fetch(path);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      
-      const html = await response.text();
-      const targetElement = document.getElementById(id);
-      
-      if (!targetElement) {
-        throw new Error(`Элемент с ID ${id} не найден`);
-      }
-
-      targetElement.innerHTML = html;
-      console.log(`Компонент ${id} успешно загружен`);
-    } catch (error) {
-      console.error(`Ошибка загрузки компонента ${id}:`, error);
-      throw error;
-    }
-  },
-
   // Инициализация модулей
   initModules() {
     try {
-      this.cart =  new Cart();
-      this.auth =  new AuthService();
+      this.cart = new Cart();
+      this.auth = new AuthService();
       this.initProducts();
     } catch (error) {
       console.error('Ошибка инициализации модулей:', error);
@@ -112,7 +70,6 @@ const App = {
       if (e.key === 'Escape') this.closeAllModals();
     });
 
-    // Делегирование событий для динамических элементов
     document.body.addEventListener('click', (e) => {
       if (e.target.closest('.overlay')) this.closeAllModals();
       if (e.target.closest('.close-modal')) this.closeAllModals();

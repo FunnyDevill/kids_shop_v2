@@ -1,14 +1,10 @@
-/**
- * Компоненты приложения Midnight Dream
- * Отвечает за загрузку и инициализацию всех HTML-компонентов
- */
 class ComponentLoader {
   constructor() {
     this.components = new Map([
-      ['header', 'partials/header.html'],
-      ['footer', 'partials/footer.html'],
-      ['authModal', 'partials/auth-modal.html'],
-      ['cartSidebar', 'partials/cart-sidebar.html']
+      ['header', '/partials/header.html'],
+      ['footer', '/partials/footer.html'],
+      ['authModal', '/partials/auth-modal.html'],
+      ['cartSidebar', '/partials/cart-sidebar.html']
     ]);
     this.initialized = false;
     this.eventHandlers = new WeakMap();
@@ -209,20 +205,20 @@ class ComponentLoader {
   }
 
   /**
-
-   /**
-   * Инициализация шапки сайта
+   * Инициализация футера
    */
   initFooter() {
     const footer = document.getElementById('footer');
     if (!footer) return;
 
-    this.setupMobileMenu(footer);
-    this.setupSearch(footer);
+    // Обновляем год в копирайте
+    this.updateCopyrightYear(footer);
+
+    // Настраиваем форму подписки
+    this.setupSubscriptionForm(footer);
   }
 
   /**
-   
    * Настройка закрытия корзины
    */
   setupCartClose(cartSidebar) {
@@ -246,6 +242,84 @@ class ComponentLoader {
     element.classList[method]('active');
     overlay?.classList[method]('active');
     document.body.classList[method]('no-scroll');
+  }
+
+  /**
+   * Настройка формы подписки
+   */
+  setupSubscriptionForm(footer) {
+    const form = footer.querySelector('.subscribe-form');
+    if (!form) return;
+
+    const handler = (e) => {
+      e.preventDefault();
+      const input = form.querySelector('input[type="email"]');
+      const email = input?.value.trim();
+      
+      if (email && this.validateEmail(email)) {
+        console.debug('Подписка оформлена:', email);
+        // Здесь будет логика отправки на сервер
+        form.reset();
+        this.showSubscriptionSuccess(footer);
+      } else {
+        this.showSubscriptionError(input, 'Некорректный email');
+      }
+    };
+
+    this.eventHandlers.set(form, handler);
+    form.addEventListener('submit', handler);
+  }
+
+  /**
+   * Валидация email
+   */
+  validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+
+  /**
+   * Показ сообщения об успешной подписке
+   */
+  showSubscriptionSuccess(footer) {
+    const existingMessage = footer.querySelector('.subscription-message');
+    if (existingMessage) existingMessage.remove();
+
+    const message = document.createElement('p');
+    message.className = 'subscription-message success';
+    message.textContent = 'Спасибо за подписку!';
+    message.style.cssText = 'color: #8aff80; margin-top: 10px;';
+
+    const subscription = footer.querySelector('.subscription');
+    if (subscription) {
+      subscription.appendChild(message);
+    }
+  }
+
+  /**
+   * Обновление года в копирайте
+   */
+  updateCopyrightYear(footer) {
+  const copyright = footer.querySelector('.copyright');
+  if (copyright) {
+    const currentYear = new Date().getFullYear();
+    // Более безопасная замена только года
+    copyright.innerHTML = copyright.innerHTML.replace(/\d{4}/, currentYear);
+  }
+}
+
+  /**
+   * Показ ошибки подписки
+   */
+  showSubscriptionError(input, text) {
+    let errorElement = input.parentElement.querySelector('.error-message');
+    if (!errorElement) {
+      errorElement = document.createElement('span');
+      errorElement.className = 'error-message';
+      errorElement.style.cssText = 'color: #ff6b6b; font-size: 14px; display: block; margin-top: 5px;';
+      input.parentElement.appendChild(errorElement);
+    }
+    errorElement.textContent = text;
   }
 
   /**

@@ -3,10 +3,6 @@ import { Cart } from './cart.js';
 import { AuthService } from './auth.js';
 import { products } from './products.js';
 
-/**
- * Midnight Dream - Главный файл приложения
- * Инициализирует все компоненты и управляет состоянием
- */
 const App = {
   // Инициализация приложения
   async init() {
@@ -25,10 +21,10 @@ const App = {
   async loadComponents() {
     try {
       const components = await Promise.allSettled([
-        this.loadComponent('header', 'partials/header.html'),
-        this.loadComponent(COMPONENTS.authModal, 'partials/auth-modal.html'),
-        this.loadComponent(COMPONENTS.cartSidebar, 'partials/cart-sidebar.html'),
-        this.loadComponent('footer', 'partials/footer.html')
+        this.loadComponent('header', '/partials/header.html'),
+        this.loadComponent(COMPONENTS.authModal, '/partials/auth-modal.html'),
+        this.loadComponent(COMPONENTS.cartSidebar, '/partials/cart-sidebar.html'),
+        this.loadComponent('footer', '/partials/footer.html')
       ]);
 
       components.forEach((result, index) => {

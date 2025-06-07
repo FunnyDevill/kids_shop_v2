@@ -5,12 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Midnight Dream | Готическая детская одежда</title>
     <link rel="icon" href="./images/favicon.ico" type="image/x-icon">
-      <link rel="stylesheet" href="css/style.css"> 
-     <link rel="stylesheet" href="css/auth.css"> 
-     <link rel="stylesheet" href="css/cart.css"> 
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet"> 
+    
+    <link rel="preload" href="./css/style.css" as="style">
+    <link rel="preload" href="./css/auth.css" as="style">
+    <link rel="preload" href="./css/cart.css" as="style">
+    
+    <link rel="stylesheet" href="./css/style.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="./css/auth.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="./css/cart.css" media="print" onload="this.media='all'">
+    
+    <noscript>
+        <link rel="stylesheet" href="./css/style.css">
+        <link rel="stylesheet" href="./css/auth.css">
+        <link rel="stylesheet" href="./css/cart.css">
+    </noscript>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="loading">
     <header id="header"></header>
     
     <div id="authModal"></div>
@@ -93,10 +105,16 @@
 
     
 
-    <script type="module" src="../js/components.js" defer></script>
-    <script type="module" src="../js/products.js" defer></script>
-    <script type="module" src="../js/cart.js" defer></script>
-    <script type="module" src="../js/auth.js" defer></script>
-    <script type="module" src="../js/app.js" defer></script>
+    <script type="module" src="./js/components.js" defer></script>
+    <script type="module" src="./js/products.js" defer></script>
+    <script type="module" src="./js/cart.js" defer></script>
+    <script type="module" src="./js/auth.js" defer></script>
+    <script type="module" src="./js/app.js" defer></script>
+    <script>
+        window.addEventListener('load', () => {
+            document.body.classList.remove('loading');
+            document.body.classList.add('loaded');
+        });
+    </script>
 </body>
 </html>

@@ -1,10 +1,16 @@
 import { COMPONENTS } from './constants.js';
 import { Cart } from './cart.js';
 import { AuthService } from './auth.js';
-import { products } from './products.js';
+import { productModule, initProducts } from './products.js';
 import { loadComponents } from './components.js';
 
-const App = {
+class App {
+  constructor() {
+    this.cart = null;
+    this.auth = null;
+    this.products = [];
+  }
+
   // Инициализация приложения
   async init() {
     try {
@@ -12,24 +18,35 @@ const App = {
       this.initModules();
       this.setupEventListeners();
       await this.checkAuthState();
+      this.initProducts();
       console.log('Приложение инициализировано');
     } catch (error) {
       console.error('Ошибка инициализации приложения:', error);
       this.showNotification('Ошибка загрузки приложения', 'error');
     }
-  },
+  }
 
   // Инициализация модулей
   initModules() {
     try {
-      this.cart = new Cart();
+      this.cart = new Cart(this.showNotification.bind(this));
       this.auth = new AuthService();
-      this.initProducts();
+      this.products = productModule.getAllProducts();
     } catch (error) {
       console.error('Ошибка инициализации модулей:', error);
       throw error;
     }
-  },
+  }
+
+  // Инициализация продуктов
+  initProducts() {
+    try {
+      initProducts(); // Инициализируем модуль продуктов
+      this.setupProductListeners();
+    } catch (error) {
+      console.error('Ошибка инициализации продуктов:', error);
+    }
+  }
 
   // Проверка состояния авторизации
   async checkAuthState() {
@@ -46,7 +63,7 @@ const App = {
       console.error('Ошибка проверки авторизации:', error);
       localStorage.removeItem('user');
     }
-  },
+  }
 
   // Обновление UI для авторизованного пользователя
   updateAuthUI(user) {
@@ -60,7 +77,7 @@ const App = {
       <span>${user.name}</span>
     `;
     authBtn.classList.add('authenticated');
-  },
+  }
 
   // Установка обработчиков событий
   setupEventListeners() {
@@ -74,7 +91,12 @@ const App = {
       if (e.target.closest('.overlay')) this.closeAllModals();
       if (e.target.closest('.close-modal')) this.closeAllModals();
     });
-  },
+
+    // Обработчик добавления в корзину через событие
+    document.addEventListener('addToCart', (e) => {
+      this.handleAddToCartEvent(e.detail.product);
+    });
+  }
 
   // Обработка глобальных кликов
   handleGlobalClicks(e) {
@@ -89,23 +111,49 @@ const App = {
       e.preventDefault();
       this.handleAuthAction(target.closest('.auth-btn'));
     }
-  },
+  }
+
+  // Обработчик событий добавления в корзину
+  handleAddToCartEvent(product) {
+    if (!product || !this.cart) return;
+    
+    this.cart.addItem(product);
+    this.showNotification(`${product.name} добавлен в корзину`, 'success');
+  }
+
+  // Настройка обработчиков для продуктов
+  setupProductListeners() {
+    document.body.addEventListener('click', (e) => {
+      if (e.target.closest('.add-to-cart')) {
+        const productId = e.target.closest('.add-to-cart')?.dataset.id;
+        if (!productId) return;
+
+        const product = productModule.getProductById(parseInt(productId));
+        if (product) {
+          this.handleAddToCartEvent(product);
+        }
+      }
+    });
+  }
 
   // Обработчик действий авторизации
   handleAuthAction(button) {
     const isAuthenticated = button.classList.contains('authenticated');
     isAuthenticated ? this.logout() : this.toggleAuthModal();
-  },
+  }
 
   // Управление корзиной
   toggleCart() {
     this.toggleComponent(COMPONENTS.cartSidebar, 'open');
-  },
+    if (this.cart) {
+      this.cart.render();
+    }
+  }
 
   // Управление модальным окном авторизации
   toggleAuthModal() {
     this.toggleComponent(COMPONENTS.authModal, 'active');
-  },
+  }
 
   // Общий метод управления состоянием компонентов
   toggleComponent(componentId, stateClass) {
@@ -116,7 +164,7 @@ const App = {
     component.classList.toggle(stateClass);
     overlay?.classList.toggle('active');
     document.body.classList.toggle('no-scroll');
-  },
+  }
 
   // Закрытие всех модальных окон
   closeAllModals() {
@@ -127,7 +175,7 @@ const App = {
 
     document.querySelector('.overlay')?.classList.remove('active');
     document.body.classList.remove('no-scroll');
-  },
+  }
 
   // Выход из системы
   logout() {
@@ -143,72 +191,7 @@ const App = {
       <span>Войти</span>
     `;
     this.showNotification('Вы вышли из системы', 'success');
-  },
-
-  // Инициализация продуктов
-  initProducts() {
-    if (!products?.length) {
-      console.error('Список продуктов пуст');
-      return;
-    }
-    this.renderProducts();
-    this.setupProductListeners();
-  },
-
-  // Рендер продуктов
-  renderProducts() {
-    const grid = document.querySelector('.products-grid');
-    if (!grid) return;
-
-    const fragment = document.createDocumentFragment();
-    
-    products.forEach(product => {
-      const productElement = this.createProductElement(product);
-      fragment.appendChild(productElement);
-    });
-
-    grid.innerHTML = '';
-    grid.appendChild(fragment);
-  },
-
-  // Создание элемента продукта
-  createProductElement(product) {
-    const element = document.createElement('div');
-    element.className = 'product-card';
-    element.dataset.id = product.id;
-    element.innerHTML = `
-      <div class="product-image" style="background-image: url('${product.image}')"></div>
-      <div class="product-info">
-        <h3>${product.name}</h3>
-        <p>${product.description}</p>
-        <div class="product-price">${product.price.toLocaleString()} ₽</div>
-        <button class="btn add-to-cart">В корзину</button>
-      </div>
-    `;
-    return element;
-  },
-
-  // Настройка обработчиков для продуктов
-  setupProductListeners() {
-    document.body.addEventListener('click', (e) => {
-      if (e.target.closest('.add-to-cart')) {
-        this.handleAddToCart(e);
-      }
-    });
-  },
-
-  // Обработка добавления в корзину
-  handleAddToCart(e) {
-    const productElement = e.target.closest('.product-card');
-    const productId = productElement?.dataset.id;
-    if (!productId) return;
-
-    const product = products.find(p => p.id === productId);
-    if (product) {
-      this.cart.addItem(product);
-      this.showNotification(`${product.name} добавлен в корзину`, 'success');
-    }
-  },
+  }
 
   // Показать уведомление
   showNotification(message, type = 'success') {
@@ -235,13 +218,16 @@ const App = {
       setTimeout(() => notification.remove(), 300);
     }, 3000);
   }
-};
+}
+
+// Создаем и экспортируем экземпляр приложения
+const application = new App();
 
 // Запуск приложения
 document.addEventListener('DOMContentLoaded', () => {
-  App.init().catch(error => {
+  application.init().catch(error => {
     console.error('Критическая ошибка приложения:', error);
   });
 });
 
-export default App;
+export { App, application };

@@ -7,10 +7,10 @@ import { COMPONENTS } from './constants.js';
 export async function loadComponents() {
   try {
     const components = await Promise.allSettled([
-      loadComponent('header', '/partials/header.html'),
-      loadComponent(COMPONENTS.authModal, '/partials/auth-modal.html'),
-      loadComponent(COMPONENTS.cartSidebar, '/partials/cart-sidebar.html'),
-      loadComponent('footer', '/partials/footer.html')
+      loadComponent('header', '../partials/header.html'),
+      loadComponent(COMPONENTS.authModal, '../partials/auth-modal.html'),
+      loadComponent(COMPONENTS.cartSidebar, '../partials/cart-sidebar.html'),
+      loadComponent('footer', '../partials/footer.html')
     ]);
 
     components.forEach((result, index) => {

@@ -221,7 +221,7 @@ header {
 
 /* HERO SECTION */
 .hero {
-  background: linear-gradient(rgba(30, 27, 75, 0.7), rgba(30, 27, 75, 0.7)), url('../images/hero-bg-dark.jpg') center/cover;
+  background: linear-gradient(rgba(30, 27, 75, 0.7), rgba(30, 27, 75, 0.7)), url('../images/hero-bg.jpg') center/cover;
   height: 90vh;
   display: flex;
   align-items: center;

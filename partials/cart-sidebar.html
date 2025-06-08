@@ -6,13 +6,13 @@
         </button>
     </div>
     
-    <div class="cart-content">
+ <div class="cart-content">
         <div class="cart-items-container">
-            <!-- Товары будут здесь -->
             <div class="cart-empty">
                 <div class="cart-empty-icon">🛒</div>
-                <h3>Корзина пуста</h3>
-                <p>Добавьте товары из каталога</p>
+                <h3>Ваша корзина пуста</h3>
+                <p>Добавьте товары из каталога, чтобы продолжить</p>
+                <a href="#products" class="btn btn--outline">Перейти в каталог</a>
             </div>
         </div>
         
@@ -21,7 +21,7 @@
                 <span>Итого:</span>
                 <span class="total-price">0 ₽</span>
             </div>
-            <button class="btn checkout-btn" disabled>
+            <button class="btn checkout-btn" disabled aria-disabled="true">
                 <span class="btn-text">Оформить заказ</span>
                 <span class="loader" hidden aria-hidden="true"></span>
             </button>

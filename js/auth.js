@@ -13,7 +13,7 @@ export class AuthService {
     try {
       return JSON.parse(localStorage.getItem('user')) || null;
     } catch (error) {
-      console.error('Ошибка чтения данных пользователя:', error);
+      console.error('Failed to parse user data:', error);
       localStorage.removeItem('user');
       return null;
     }
@@ -28,7 +28,6 @@ export class AuthService {
         throw new Error('Введите пароль');
       }
 
-      // Эмуляция API-запроса
       const user = await this.mockApiRequest('/login', { email, password });
       
       this.currentUser = user;
@@ -50,11 +49,10 @@ export class AuthService {
       if (!this.validateEmail(email)) {
         throw new Error('Некорректный email');
       }
-      if (password.length < 8) {
-        throw new Error('Пароль должен быть не менее 8 символов');
+      if (password.length < 6) {
+        throw new Error('Пароль должен быть не менее 6 символов');
       }
 
-      // Эмуляция API-запроса
       const user = await this.mockApiRequest('/register', { name, email, password });
       
       this.currentUser = user;
@@ -75,7 +73,7 @@ export class AuthService {
   async mockApiRequest(url, data) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        if (Math.random() < 0.05) { // 5% chance of error
+        if (Math.random() < 0.05) {
           reject(new Error('Ошибка сервера'));
         } else {
           resolve({
@@ -92,7 +90,7 @@ export class AuthService {
     try {
       localStorage.setItem('user', JSON.stringify(user));
     } catch (error) {
-      console.error('Ошибка сохранения пользователя:', error);
+      console.error('Failed to save user:', error);
     }
   }
 
@@ -150,7 +148,7 @@ export class AuthService {
   }
 
   handleAuthError(error) {
-    console.error('Ошибка аутентификации:', error);
+    console.error('Auth error:', error);
     const message = error.message || 'Произошла ошибка';
     this.dispatchAuthEvent('error', { error: message });
   }

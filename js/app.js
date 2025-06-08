@@ -11,44 +11,41 @@ class App {
     this.products = [];
   }
 
-  // Инициализация приложения
   async init() {
     try {
       await loadComponents();
       this.initModules();
       this.setupEventListeners();
       await this.checkAuthState();
-      this.initProducts();
-      console.log('Приложение инициализировано');
+      await this.initProducts();
+      console.log('App initialized successfully');
     } catch (error) {
-      console.error('Ошибка инициализации приложения:', error);
+      console.error('App initialization failed:', error);
       this.showNotification('Ошибка загрузки приложения', 'error');
     }
   }
 
-  // Инициализация модулей
   initModules() {
     try {
       this.cart = new Cart(this.showNotification.bind(this));
       this.auth = new AuthService();
       this.products = productModule.getAllProducts();
     } catch (error) {
-      console.error('Ошибка инициализации модулей:', error);
+      console.error('Module initialization error:', error);
       throw error;
     }
   }
 
-  // Инициализация продуктов
-  initProducts() {
+  async initProducts() {
     try {
-      initProducts(); // Инициализируем модуль продуктов
+      await initProducts();
       this.setupProductListeners();
     } catch (error) {
-      console.error('Ошибка инициализации продуктов:', error);
+      console.error('Products initialization error:', error);
+      throw error;
     }
   }
 
-  // Проверка состояния авторизации
   async checkAuthState() {
     try {
       const userData = localStorage.getItem('user');
@@ -56,16 +53,14 @@ class App {
 
       const user = JSON.parse(userData);
       if (user?.email && user?.name) {
-        console.log('Пользователь авторизован:', user.email);
         this.updateAuthUI(user);
       }
     } catch (error) {
-      console.error('Ошибка проверки авторизации:', error);
+      console.error('Auth check failed:', error);
       localStorage.removeItem('user');
     }
   }
 
-  // Обновление UI для авторизованного пользователя
   updateAuthUI(user) {
     const authBtn = document.querySelector('.auth-btn');
     if (!authBtn) return;
@@ -79,7 +74,6 @@ class App {
     authBtn.classList.add('authenticated');
   }
 
-  // Установка обработчиков событий
   setupEventListeners() {
     document.addEventListener('click', this.handleGlobalClicks.bind(this));
     
@@ -87,18 +81,16 @@ class App {
       if (e.key === 'Escape') this.closeAllModals();
     });
 
-    document.body.addEventListener('click', (e) => {
+    document.addEventListener('click', (e) => {
       if (e.target.closest('.overlay')) this.closeAllModals();
       if (e.target.closest('.close-modal')) this.closeAllModals();
     });
 
-    // Обработчик добавления в корзину через событие
     document.addEventListener('addToCart', (e) => {
       this.handleAddToCartEvent(e.detail.product);
     });
   }
 
-  // Обработка глобальных кликов
   handleGlobalClicks(e) {
     const { target } = e;
     
@@ -113,7 +105,6 @@ class App {
     }
   }
 
-  // Обработчик событий добавления в корзину
   handleAddToCartEvent(product) {
     if (!product || !this.cart) return;
     
@@ -121,9 +112,8 @@ class App {
     this.showNotification(`${product.name} добавлен в корзину`, 'success');
   }
 
-  // Настройка обработчиков для продуктов
   setupProductListeners() {
-    document.body.addEventListener('click', (e) => {
+    document.addEventListener('click', (e) => {
       if (e.target.closest('.add-to-cart')) {
         const productId = e.target.closest('.add-to-cart')?.dataset.id;
         if (!productId) return;
@@ -136,26 +126,20 @@ class App {
     });
   }
 
-  // Обработчик действий авторизации
   handleAuthAction(button) {
     const isAuthenticated = button.classList.contains('authenticated');
     isAuthenticated ? this.logout() : this.toggleAuthModal();
   }
 
-  // Управление корзиной
   toggleCart() {
     this.toggleComponent(COMPONENTS.cartSidebar, 'open');
-    if (this.cart) {
-      this.cart.render();
-    }
+    this.cart?.render();
   }
 
-  // Управление модальным окном авторизации
   toggleAuthModal() {
     this.toggleComponent(COMPONENTS.authModal, 'active');
   }
 
-  // Общий метод управления состоянием компонентов
   toggleComponent(componentId, stateClass) {
     const component = document.getElementById(componentId);
     if (!component) return;
@@ -166,18 +150,15 @@ class App {
     document.body.classList.toggle('no-scroll');
   }
 
-  // Закрытие всех модальных окон
   closeAllModals() {
     [COMPONENTS.cartSidebar, COMPONENTS.authModal].forEach(id => {
-      const element = document.getElementById(id);
-      element?.classList.remove('open', 'active');
+      document.getElementById(id)?.classList.remove('open', 'active');
     });
 
     document.querySelector('.overlay')?.classList.remove('active');
     document.body.classList.remove('no-scroll');
   }
 
-  // Выход из системы
   logout() {
     localStorage.removeItem('user');
     const authBtn = document.querySelector('.auth-btn');
@@ -188,12 +169,10 @@ class App {
       <svg width="20" height="20" fill="currentColor">
         <use href="#user-icon"></use>
       </svg>
-      <span>Войти</span>
     `;
     this.showNotification('Вы вышли из системы', 'success');
   }
 
-  // Показать уведомление
   showNotification(message, type = 'success') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
@@ -220,13 +199,11 @@ class App {
   }
 }
 
-// Создаем и экспортируем экземпляр приложения
 const application = new App();
 
-// Запуск приложения
 document.addEventListener('DOMContentLoaded', () => {
   application.init().catch(error => {
-    console.error('Критическая ошибка приложения:', error);
+    console.error('Critical app error:', error);
   });
 });
 

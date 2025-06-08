@@ -1,21 +1,30 @@
-<aside class="cart-sidebar">
+<aside id="cart-sidebar" class="cart-sidebar" aria-label="Корзина покупок">
     <div class="cart-header">
-        <h3>Ваша корзина</h3>
-        <button class="close-cart">&times;</button>
-    </div>
-    
-    <div class="cart-items">
-        <!-- Товары будут здесь -->
-    </div>
-    
-    <div class="cart-footer">
-        <div class="cart-total">
-            <span>Итого:</span>
-            <span class="total-price">0 ₽</span>
-        </div>
-        <button class="btn checkout-btn">
-            <span class="btn-text">Оформить заказ</span>
-            <span class="loader" hidden></span>
+        <h2 class="cart-title">Ваша корзина</h2>
+        <button class="close-cart" aria-label="Закрыть корзину">
+            <span aria-hidden="true">&times;</span>
         </button>
+    </div>
+    
+    <div class="cart-content">
+        <div class="cart-items-container">
+            <!-- Товары будут здесь -->
+            <div class="cart-empty">
+                <div class="cart-empty-icon">🛒</div>
+                <h3>Корзина пуста</h3>
+                <p>Добавьте товары из каталога</p>
+            </div>
+        </div>
+        
+        <div class="cart-summary">
+            <div class="cart-total">
+                <span>Итого:</span>
+                <span class="total-price">0 ₽</span>
+            </div>
+            <button class="btn checkout-btn" disabled>
+                <span class="btn-text">Оформить заказ</span>
+                <span class="loader" hidden aria-hidden="true"></span>
+            </button>
+        </div>
     </div>
 </aside>

@@ -1,47 +1,60 @@
 export class Cart {
   constructor(notificationCallback) {
-    this.items = JSON.parse(localStorage.getItem('cart')) || [];
+    this.items = this.loadCart();
     this.notificationCallback = notificationCallback;
     this.init();
   }
 
+  loadCart() {
+    try {
+      const cartData = localStorage.getItem('cart');
+      return cartData ? JSON.parse(cartData) : [];
+    } catch (error) {
+      console.error('Failed to load cart:', error);
+      localStorage.removeItem('cart');
+      return [];
+    }
+  }
+
   init() {
     this.setupListeners();
-    this.render();
+    this.updateCartCounter();
   }
 
   async processCheckout() {
-    try {
-      if (this.items.length === 0) {
-        throw new Error('Корзина пуста');
-      }
+    if (this.items.length === 0) {
+      this.showNotification('Корзина пуста', 'error');
+      return false;
+    }
 
-      const btn = document.querySelector('.checkout-btn');
+    const btn = document.querySelector('.checkout-btn');
+    try {
       if (btn) {
         btn.disabled = true;
-        btn.querySelector('.btn-text').textContent = 'Обработка...';
-        btn.querySelector('.loader').hidden = false;
+        const btnText = btn.querySelector('.btn-text');
+        const loader = btn.querySelector('.loader');
+        if (btnText) btnText.textContent = 'Обработка...';
+        if (loader) loader.hidden = false;
       }
 
       const response = await this.mockApiRequest();
 
       if (response.success) {
-        this.items = [];
-        this.save();
-        this.render();
-        this.showNotification('Заказ оформлен! Номер: ' + response.orderId, 'success');
+        this.clearCart();
+        this.showNotification(`Заказ оформлен! Номер: ${response.orderId}`, 'success');
         this.closeCart();
         return true;
       }
     } catch (error) {
-      this.showNotification(error.message, 'error');
+      this.showNotification(error.message || 'Ошибка оформления заказа', 'error');
       return false;
     } finally {
-      const btn = document.querySelector('.checkout-btn');
       if (btn) {
         btn.disabled = false;
-        btn.querySelector('.btn-text').textContent = 'Оформить заказ';
-        btn.querySelector('.loader').hidden = true;
+        const btnText = btn.querySelector('.btn-text');
+        const loader = btn.querySelector('.loader');
+        if (btnText) btnText.textContent = 'Оформить заказ';
+        if (loader) loader.hidden = true;
       }
     }
   }
@@ -51,7 +64,7 @@ export class Cart {
       setTimeout(() => {
         resolve({
           success: true,
-          orderId: 'MD-' + Math.floor(Math.random() * 1000000)
+          orderId: `MD-${Math.floor(Math.random() * 1000000)}`
         });
       }, 1500);
     });
@@ -64,21 +77,25 @@ export class Cart {
     });
 
     document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('remove-btn')) {
-        const itemId = parseInt(e.target.closest('.cart-item')?.dataset.id);
-        if (!isNaN(itemId)) {
-          this.removeItem(itemId);
-        }
+      const removeBtn = e.target.closest('.remove-btn');
+      if (!removeBtn) return;
+
+      const itemId = parseInt(removeBtn.closest('.cart-item')?.dataset.id);
+      if (!isNaN(itemId)) {
+        this.removeItem(itemId);
       }
     });
 
     document.addEventListener('change', (e) => {
-      if (e.target.classList.contains('quantity-input')) {
-        const itemId = parseInt(e.target.closest('.cart-item')?.dataset.id);
-        const newQuantity = parseInt(e.target.value);
-        
-        if (!isNaN(itemId) && !isNaN(newQuantity) && newQuantity > 0) {
-          this.updateQuantity(itemId, newQuantity);
+      const quantityInput = e.target.closest('.quantity-input');
+      if (!quantityInput) return;
+
+      const itemId = parseInt(quantityInput.closest('.cart-item')?.dataset.id);
+      const newQuantity = parseInt(quantityInput.value);
+      
+      if (!isNaN(itemId)) {
+        if (!isNaN(newQuantity)) {
+          this.updateQuantity(itemId, Math.max(1, newQuantity));
         } else {
           this.render();
         }
@@ -93,6 +110,8 @@ export class Cart {
   }
 
   addItem(product, quantity = 1) {
+    if (!product || !product.id) return;
+
     const existingItem = this.items.find(item => item.id === product.id);
     
     if (existingItem) {
@@ -102,7 +121,7 @@ export class Cart {
         id: product.id,
         name: product.name,
         price: product.price,
-        image: product.image,
+        image: product.image || 'images/placeholder.jpg',
         category: product.category,
         quantity: quantity
       });
@@ -132,9 +151,18 @@ export class Cart {
     this.render();
   }
 
+  clearCart() {
+    this.items = [];
+    this.save();
+  }
+
   save() {
-    localStorage.setItem('cart', JSON.stringify(this.items));
-    this.updateCartCounter();
+    try {
+      localStorage.setItem('cart', JSON.stringify(this.items));
+      this.updateCartCounter();
+    } catch (error) {
+      console.error('Failed to save cart:', error);
+    }
   }
 
   updateCartCounter() {
@@ -142,7 +170,7 @@ export class Cart {
     if (!counter) return;
 
     const totalItems = this.items.reduce((sum, item) => sum + item.quantity, 0);
-    counter.textContent = totalItems;
+    counter.textContent = totalItems > 99 ? '99+' : totalItems;
     counter.style.display = totalItems > 0 ? 'flex' : 'none';
   }
 

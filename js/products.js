@@ -1,6 +1,6 @@
 import { ProductCard } from './product-card.js';
 
-export const products = [
+const products = [
   {
     id: 1,
     name: "Платье 'Лунная фея'",
@@ -37,15 +37,27 @@ export const products = [
 ];
 
 export function initProducts() {
-  renderProducts(products);
-  setupEventListeners();
+  try {
+    renderProducts(products);
+    setupEventListeners();
+  } catch (error) {
+    console.error('Failed to initialize products:', error);
+  }
 }
 
 function renderProducts(productsToRender) {
   const productsGrid = document.querySelector('.products-grid');
-  if (!productsGrid) return;
+  if (!productsGrid) {
+    console.warn('Products grid element not found');
+    return;
+  }
   
-  productsGrid.innerHTML = ProductCard.renderAll(productsToRender);
+  try {
+    productsGrid.innerHTML = ProductCard.renderAll(productsToRender);
+  } catch (error) {
+    console.error('Failed to render products:', error);
+    productsGrid.innerHTML = '<p class="error-message">Произошла ошибка при загрузке товаров</p>';
+  }
 }
 
 function filterProducts(category) {
@@ -54,30 +66,40 @@ function filterProducts(category) {
     return;
   }
   
-  const filtered = products.filter(
-    product => product.category === category
-  );
-  renderProducts(filtered);
+  try {
+    const filtered = products.filter(
+      product => product.category === category
+    );
+    renderProducts(filtered.length ? filtered : products);
+  } catch (error) {
+    console.error('Failed to filter products:', error);
+    renderProducts(products);
+  }
 }
 
 function sortProducts(sortType) {
-  const sorted = [...products];
-  
-  switch(sortType) {
-    case 'price-asc':
-      sorted.sort((a, b) => a.price - b.price);
-      break;
-    case 'price-desc':
-      sorted.sort((a, b) => b.price - a.price);
-      break;
-    case 'newest':
-      sorted.sort((a, b) => (b.isNew || false) - (a.isNew || false));
-      break;
-    default:
-      break;
+  try {
+    const sorted = [...products];
+    
+    switch(sortType) {
+      case 'price-asc':
+        sorted.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        sorted.sort((a, b) => b.price - a.price);
+        break;
+      case 'newest':
+        sorted.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+        break;
+      default:
+        break;
+    }
+    
+    renderProducts(sorted);
+  } catch (error) {
+    console.error('Failed to sort products:', error);
+    renderProducts(products);
   }
-  
-  renderProducts(sorted);
 }
 
 function setupEventListeners() {
@@ -87,9 +109,12 @@ function setupEventListeners() {
 
   filterButtons?.forEach(btn => {
     btn.addEventListener('click', () => {
+      const category = btn.dataset.category;
+      if (!category) return;
+
       filterButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      filterProducts(btn.dataset.category);
+      filterProducts(category);
     });
   });
 
@@ -98,23 +123,26 @@ function setupEventListeners() {
   });
 
   productsGrid?.addEventListener('click', (e) => {
-    if (e.target.classList.contains('add-to-cart')) {
-      const productId = parseInt(e.target.dataset.id);
-      const product = products.find(p => p.id === productId);
-      
-      if (product) {
-        const event = new CustomEvent('addToCart', {
-          detail: { product },
-          bubbles: true
-        });
-        e.target.dispatchEvent(event);
-      }
-    }
+    const addToCartBtn = e.target.closest('.add-to-cart');
+    if (!addToCartBtn) return;
+
+    const productId = parseInt(addToCartBtn.dataset.id);
+    if (isNaN(productId)) return;
+
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    const event = new CustomEvent('addToCart', {
+      detail: { product },
+      bubbles: true
+    });
+    addToCartBtn.dispatchEvent(event);
   });
 }
 
 export const productModule = {
   init: initProducts,
   getProductById: (id) => products.find(p => p.id === id),
-  getAllProducts: () => [...products]
+  getAllProducts: () => [...products],
+  getProductsByCategory: (category) => products.filter(p => p.category === category)
 };

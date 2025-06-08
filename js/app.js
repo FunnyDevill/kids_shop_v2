@@ -9,15 +9,21 @@ class App {
     this.cart = null;
     this.auth = null;
     this.products = [];
+    this.isInitialized = false;
   }
 
   async init() {
+    if (this.isInitialized) return;
+    
     try {
       await loadComponents();
       this.initModules();
       this.setupEventListeners();
-      await this.checkAuthState();
-      await this.initProducts();
+      await Promise.all([
+        this.checkAuthState(),
+        this.initProducts()
+      ]);
+      this.isInitialized = true;
       console.log('App initialized successfully');
     } catch (error) {
       console.error('App initialization failed:', error);
@@ -114,19 +120,22 @@ class App {
 
   setupProductListeners() {
     document.addEventListener('click', (e) => {
-      if (e.target.closest('.add-to-cart')) {
-        const productId = e.target.closest('.add-to-cart')?.dataset.id;
-        if (!productId) return;
+      const addToCartBtn = e.target.closest('.add-to-cart');
+      if (!addToCartBtn) return;
 
-        const product = productModule.getProductById(parseInt(productId));
-        if (product) {
-          this.handleAddToCartEvent(product);
-        }
+      const productId = parseInt(addToCartBtn.dataset.id);
+      if (isNaN(productId)) return;
+
+      const product = productModule.getProductById(productId);
+      if (product) {
+        this.handleAddToCartEvent(product);
       }
     });
   }
 
   handleAuthAction(button) {
+    if (!button) return;
+    
     const isAuthenticated = button.classList.contains('authenticated');
     isAuthenticated ? this.logout() : this.toggleAuthModal();
   }
@@ -152,10 +161,14 @@ class App {
 
   closeAllModals() {
     [COMPONENTS.cartSidebar, COMPONENTS.authModal].forEach(id => {
-      document.getElementById(id)?.classList.remove('open', 'active');
+      const element = document.getElementById(id);
+      if (element) {
+        element.classList.remove('open', 'active');
+      }
     });
 
-    document.querySelector('.overlay')?.classList.remove('active');
+    const overlay = document.querySelector('.overlay');
+    overlay?.classList.remove('active');
     document.body.classList.remove('no-scroll');
   }
 
@@ -174,6 +187,11 @@ class App {
   }
 
   showNotification(message, type = 'success') {
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => {
+      notification.remove();
+    });
+
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.setAttribute('role', 'status');

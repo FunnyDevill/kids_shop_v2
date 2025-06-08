@@ -9,24 +9,19 @@ class App {
     this.cart = null;
     this.auth = null;
     this.products = [];
-    this.isInitialized = false;
+    this.currentModal = null; // Добавлено: отслеживание текущего модального окна
   }
 
   async init() {
-    if (this.isInitialized) return;
-    
     try {
       await loadComponents();
       this.initModules();
       this.setupEventListeners();
-      await Promise.all([
-        this.checkAuthState(),
-        this.initProducts()
-      ]);
-      this.isInitialized = true;
-      console.log('App initialized successfully');
+      await this.checkAuthState();
+      this.initProducts();
+      console.log('Приложение инициализировано');
     } catch (error) {
-      console.error('App initialization failed:', error);
+      console.error('Ошибка инициализации приложения:', error);
       this.showNotification('Ошибка загрузки приложения', 'error');
     }
   }
@@ -37,18 +32,17 @@ class App {
       this.auth = new AuthService();
       this.products = productModule.getAllProducts();
     } catch (error) {
-      console.error('Module initialization error:', error);
+      console.error('Ошибка инициализации модулей:', error);
       throw error;
     }
   }
 
-  async initProducts() {
+  initProducts() {
     try {
-      await initProducts();
+      initProducts();
       this.setupProductListeners();
     } catch (error) {
-      console.error('Products initialization error:', error);
-      throw error;
+      console.error('Ошибка инициализации продуктов:', error);
     }
   }
 
@@ -59,10 +53,11 @@ class App {
 
       const user = JSON.parse(userData);
       if (user?.email && user?.name) {
+        console.log('Пользователь авторизован:', user.email);
         this.updateAuthUI(user);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error('Ошибка проверки авторизации:', error);
       localStorage.removeItem('user');
     }
   }
@@ -87,9 +82,11 @@ class App {
       if (e.key === 'Escape') this.closeAllModals();
     });
 
+    // Изменено: обработка кликов по overlay
     document.addEventListener('click', (e) => {
-      if (e.target.closest('.overlay')) this.closeAllModals();
-      if (e.target.closest('.close-modal')) this.closeAllModals();
+      if (e.target.classList.contains('overlay')) {
+        this.closeAllModals();
+      }
     });
 
     document.addEventListener('addToCart', (e) => {
@@ -119,34 +116,45 @@ class App {
   }
 
   setupProductListeners() {
-    document.addEventListener('click', (e) => {
-      const addToCartBtn = e.target.closest('.add-to-cart');
-      if (!addToCartBtn) return;
+    document.body.addEventListener('click', (e) => {
+      if (e.target.closest('.add-to-cart')) {
+        const productId = e.target.closest('.add-to-cart')?.dataset.id;
+        if (!productId) return;
 
-      const productId = parseInt(addToCartBtn.dataset.id);
-      if (isNaN(productId)) return;
-
-      const product = productModule.getProductById(productId);
-      if (product) {
-        this.handleAddToCartEvent(product);
+        const product = productModule.getProductById(parseInt(productId));
+        if (product) {
+          this.handleAddToCartEvent(product);
+        }
       }
     });
   }
 
   handleAuthAction(button) {
-    if (!button) return;
-    
     const isAuthenticated = button.classList.contains('authenticated');
     isAuthenticated ? this.logout() : this.toggleAuthModal();
   }
 
   toggleCart() {
-    this.toggleComponent(COMPONENTS.cartSidebar, 'open');
-    this.cart?.render();
+    if (this.currentModal === COMPONENTS.cartSidebar) {
+      this.closeAllModals();
+    } else {
+      this.closeAllModals();
+      this.toggleComponent(COMPONENTS.cartSidebar, 'open');
+      this.currentModal = COMPONENTS.cartSidebar;
+      if (this.cart) {
+        this.cart.render();
+      }
+    }
   }
 
   toggleAuthModal() {
-    this.toggleComponent(COMPONENTS.authModal, 'active');
+    if (this.currentModal === COMPONENTS.authModal) {
+      this.closeAllModals();
+    } else {
+      this.closeAllModals();
+      this.toggleComponent(COMPONENTS.authModal, 'active');
+      this.currentModal = COMPONENTS.authModal;
+    }
   }
 
   toggleComponent(componentId, stateClass) {
@@ -162,14 +170,13 @@ class App {
   closeAllModals() {
     [COMPONENTS.cartSidebar, COMPONENTS.authModal].forEach(id => {
       const element = document.getElementById(id);
-      if (element) {
-        element.classList.remove('open', 'active');
-      }
+      element?.classList.remove('open', 'active');
     });
 
     const overlay = document.querySelector('.overlay');
     overlay?.classList.remove('active');
     document.body.classList.remove('no-scroll');
+    this.currentModal = null;
   }
 
   logout() {
@@ -182,16 +189,12 @@ class App {
       <svg width="20" height="20" fill="currentColor">
         <use href="#user-icon"></use>
       </svg>
+      <span>Войти</span>
     `;
     this.showNotification('Вы вышли из системы', 'success');
   }
 
   showNotification(message, type = 'success') {
-    const existingNotifications = document.querySelectorAll('.notification');
-    existingNotifications.forEach(notification => {
-      notification.remove();
-    });
-
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.setAttribute('role', 'status');
@@ -221,7 +224,7 @@ const application = new App();
 
 document.addEventListener('DOMContentLoaded', () => {
   application.init().catch(error => {
-    console.error('Critical app error:', error);
+    console.error('Критическая ошибка приложения:', error);
   });
 });
 

@@ -5,7 +5,6 @@ import { COMPONENTS } from './constants.js';
  * @returns {Promise<void>}
  */
 export async function loadComponents() {
-   
   try {
     const components = await Promise.allSettled([
       loadComponent('header', './partials/header.html'),

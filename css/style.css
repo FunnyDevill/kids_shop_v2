@@ -1,10 +1,10 @@
 :root {
-  --primary: #8b5cf6; /* Фиолетовый вместо оранжевого */
-  --secondary: #a78bfa; /* Светло-фиолетовый */
-  --dark: #1e1b4b; /* Темно-синий вместо серого */
-  --light: #f5f3ff; /* Очень светлый фиолетовый */
-  --gray: #6b7280; /* Серый */
-  --accent: #ec4899; /* Розовый для акцентов */
+  --primary: #8b5cf6;
+  --secondary: #a78bfa;
+  --dark: #1e1b4b;
+  --light: #f5f3ff;
+  --gray: #6b7280;
+  --accent: #ec4899;
   --shadow: 0 4px 12px rgba(0,0,0,0.2);
   --transition: all 0.3s ease;
   --gothic-font: 'Cinzel Decorative', serif;
@@ -27,6 +27,10 @@ body {
   color: #111827;
   background-color: var(--light);
   overflow-x: hidden;
+}
+
+body.no-scroll {
+  overflow: hidden;
 }
 
 img {
@@ -727,15 +731,17 @@ section h1 {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
+  z-index: 100; /* Ниже чем модальные окна */
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
 }
+
 .overlay.active {
   opacity: 1;
   pointer-events: auto;
 }
+
 .notification {
   position: fixed;
   bottom: 20px;
@@ -751,8 +757,9 @@ section h1 {
   transform: translateY(100px);
   opacity: 0;
   transition: all 0.3s ease;
-  z-index: 1001;
+  z-index: 1002; /* Выше модальных окон */
 }
+
 .notification.show {
   transform: translateY(0);
   opacity: 1;

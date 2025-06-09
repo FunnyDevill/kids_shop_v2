@@ -36,12 +36,17 @@ export async function loadComponent(id, path) {
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     
     const html = await response.text();
-    const targetElement = document.getElementById(id);
     
+    if (id === COMPONENTS.authModal || id === COMPONENTS.cartSidebar) {
+      document.body.insertAdjacentHTML('beforeend', html);
+      console.log(`Компонент ${id} успешно загружен`);
+      return document.getElementById(id);
+    }
+    
+    const targetElement = document.getElementById(id);
     if (!targetElement) {
       throw new Error(`Элемент с ID ${id} не найден`);
     }
-
     targetElement.innerHTML = html;
     console.log(`Компонент ${id} успешно загружен`);
     return targetElement;

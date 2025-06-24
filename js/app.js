@@ -95,6 +95,12 @@ class App {
         this.closeAllModals();
       }
 
+      //обрабочик кнопри перехода к коллекции
+      if (e.target.closest('.btn-large') && e.target.closest('.hero')) {
+         e.preventDefault();
+         this.scrollToProducts();
+      }
+
       // Обработчик добавления в корзину
       if (e.target.closest('.add-to-cart')) {
         e.preventDefault();
@@ -112,6 +118,15 @@ class App {
       if (e.key === 'Escape') this.closeAllModals();
     });
   }
+
+  scrollToProducts() {
+  const productsSection = document.getElementById('products');
+  if (productsSection) {
+    productsSection.scrollIntoView({
+      behavior: 'smooth'
+    });
+  }
+}
 
   handleAddToCartEvent(product) {
     if (!product || !this.cart) return;

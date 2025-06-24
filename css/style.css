@@ -215,7 +215,7 @@ header {
 /* Mobile styles */
 @media (max-width: 768px) {
   .main-nav {
-    display: none; /* Will be toggled via JS */
+    display: none;
   }
   
   .user-actions {

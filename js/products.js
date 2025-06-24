@@ -105,7 +105,6 @@ function sortProducts(sortType) {
 function setupEventListeners() {
   const filterButtons = document.querySelectorAll('.filter-btn');
   const sortSelect = document.querySelector('.sort-select');
-  const productsGrid = document.querySelector('.products-grid');
 
   filterButtons?.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -120,23 +119,6 @@ function setupEventListeners() {
 
   sortSelect?.addEventListener('change', (e) => {
     sortProducts(e.target.value);
-  });
-
-  productsGrid?.addEventListener('click', (e) => {
-    const addToCartBtn = e.target.closest('.add-to-cart');
-    if (!addToCartBtn) return;
-
-    const productId = parseInt(addToCartBtn.dataset.id);
-    if (isNaN(productId)) return;
-
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
-
-    const event = new CustomEvent('addToCart', {
-      detail: { product },
-      bubbles: true
-    });
-    addToCartBtn.dispatchEvent(event);
   });
 }
 

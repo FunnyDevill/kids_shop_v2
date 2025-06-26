@@ -74,58 +74,70 @@ class App {
     authBtn.classList.add('authenticated');
   }
 
-  setupEventListeners() {
-    document.addEventListener('click', (e) => {
-      if (e.target.closest('.cart-btn')) {
-        e.preventDefault();
-        this.toggleCart();
+setupEventListeners() {
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.cart-btn')) {
+      e.preventDefault();
+      this.toggleCart();
+    }
+
+    if (e.target.closest('.auth-btn')) {
+      e.preventDefault();
+      this.handleAuthAction(e.target.closest('.auth-btn'));
+    }
+
+    if (e.target.closest('.close-modal') || e.target.closest('.close-cart')) {
+      e.preventDefault();
+      this.closeAllModals();
+    }
+
+    if (e.target.closest('.overlay')) {
+      this.closeAllModals();
+    }
+
+    if (e.target.closest('.btn-large') && e.target.closest('.hero')) {
+      e.preventDefault();
+      this.scrollToProducts();
+    }
+
+    // Обработчик для кнопок "В корзину" (в карточке товара и в модалке)
+    if (e.target.closest('.add-to-cart')) {
+      e.preventDefault();
+      let productId;
+      
+      // Если клик в модалке - берем ID из dataset модального окна
+      if (e.target.closest(`#${COMPONENTS.productModal}`)) {
+        productId = document.getElementById(COMPONENTS.productModal).dataset.id;
+      } 
+      // Если клик в карточке товара - берем ID из data-атрибута кнопки
+      else {
+        productId = e.target.closest('.add-to-cart').dataset.id;
       }
 
-      if (e.target.closest('.auth-btn')) {
-        e.preventDefault();
-        this.handleAuthAction(e.target.closest('.auth-btn'));
+      if (!productId) return;
+
+      const product = productModule.getProductById(parseInt(productId));
+      if (product) {
+        this.handleAddToCartEvent(product);
+        this.closeAllModals(); // Закрываем модалку после добавления
       }
+    }
 
-      if (e.target.closest('.close-modal') || e.target.closest('.close-cart')) {
-        e.preventDefault();
-        this.closeAllModals();
+    if (e.target.closest('.product-card')) {
+      e.preventDefault();
+      const productCard = e.target.closest('.product-card');
+      const productId = parseInt(productCard.dataset.id);
+      const product = productModule.getProductById(productId);
+      if (product) {
+        this.showProductModal(product);
       }
+    }
+  });
 
-      if (e.target.closest('.overlay')) {
-        this.closeAllModals();
-      }
-
-      if (e.target.closest('.btn-large') && e.target.closest('.hero')) {
-         e.preventDefault();
-         this.scrollToProducts();
-      }
-
-      if (e.target.closest('.add-to-cart')) {
-        e.preventDefault();
-        const productId = e.target.closest('.add-to-cart').dataset.id;
-        if (!productId) return;
-
-        const product = productModule.getProductById(parseInt(productId));
-        if (product) {
-          this.handleAddToCartEvent(product);
-        }
-      }
-
-      if (e.target.closest('.product-card')) {
-        e.preventDefault();
-        const productCard = e.target.closest('.product-card');
-        const productId = parseInt(productCard.dataset.id);
-        const product = productModule.getProductById(productId);
-        if (product) {
-          this.showProductModal(product);
-        }
-      }
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') this.closeAllModals();
-    });
-  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') this.closeAllModals();
+  });
+}
 
   scrollToProducts() {
     const productsSection = document.getElementById('products');
@@ -137,45 +149,49 @@ class App {
   }
 
   showProductModal(product) {
-    const modal = document.getElementById('product-modal');
-    console.log('Открытие модального окна для товара:', product);
-    if (!modal) {
-       console.error('Модальное окно товара не найдено');
-       return;
-    }
-
-    document.getElementById('product-modal-title').textContent = product.name;
-    document.getElementById('product-modal-price').textContent = `${product.price.toLocaleString()} ₽`;
-    document.getElementById('product-modal-category').textContent = product.category;
-    document.getElementById('product-modal-description').textContent = product.description;
-  
-    const mainImage = document.getElementById('product-main-image');
-    mainImage.src = product.image;
-    mainImage.alt = product.name;
-
-    const sizeOptions = document.getElementById('product-size-options');
-    sizeOptions.innerHTML = '';
-    product.sizes.forEach(size => {
-      const sizeElement = document.createElement('div');
-      sizeElement.className = 'size-option';
-      sizeElement.textContent = size;
-      sizeOptions.appendChild(sizeElement);
-    });
-
-    const colorOptions = document.getElementById('product-color-options');
-    colorOptions.innerHTML = '';
-    product.colors.forEach(color => {
-      const colorElement = document.createElement('div');
-      colorElement.className = 'color-option';
-      colorElement.style.backgroundColor = color;
-      colorOptions.appendChild(colorElement);
-    });
-
-    modal.setAttribute('aria-hidden', 'false');
-    document.querySelector('.overlay').classList.add('active');
-    document.body.classList.add('no-scroll');
-    this.currentModal = COMPONENTS.productModal;
+  const modal = document.getElementById(COMPONENTS.productModal);
+  console.log('Открытие модального окна для товара:', product);
+  if (!modal) {
+    console.error('Модальное окно товара не найдено');
+    return;
   }
+
+  // Сохраняем ID товара в dataset модального окна и кнопки
+  modal.dataset.id = product.id;
+  modal.querySelector('.add-to-cart').dataset.id = product.id;
+
+  document.getElementById('product-modal-title').textContent = product.name;
+  document.getElementById('product-modal-price').textContent = `${product.price.toLocaleString()} ₽`;
+  document.getElementById('product-modal-category').textContent = product.category;
+  document.getElementById('product-modal-description').textContent = product.description;
+
+  const mainImage = document.getElementById('product-main-image');
+  mainImage.src = product.image;
+  mainImage.alt = product.name;
+
+  const sizeOptions = document.getElementById('product-size-options');
+  sizeOptions.innerHTML = '';
+  product.sizes.forEach(size => {
+    const sizeElement = document.createElement('div');
+    sizeElement.className = 'size-option';
+    sizeElement.textContent = size;
+    sizeOptions.appendChild(sizeElement);
+  });
+
+  const colorOptions = document.getElementById('product-color-options');
+  colorOptions.innerHTML = '';
+  product.colors.forEach(color => {
+    const colorElement = document.createElement('div');
+    colorElement.className = 'color-option';
+    colorElement.style.backgroundColor = color;
+    colorOptions.appendChild(colorElement);
+  });
+
+  modal.setAttribute('aria-hidden', 'false');
+  document.querySelector('.overlay').classList.add('active');
+  document.body.classList.add('no-scroll');
+  this.currentModal = COMPONENTS.productModal;
+}
 
   handleAddToCartEvent(product) {
     if (!product || !this.cart) return;

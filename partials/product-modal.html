@@ -1,0 +1,44 @@
+<div id="product-modal" class="product-modal" aria-hidden="true">
+  <div class="product-modal__overlay"></div>
+  
+  <div class="product-modal__content">
+    <button class="product-modal__close close-modal" aria-label="Закрыть окно товара">
+      &times;
+    </button>
+    
+    <div class="product-modal__body">
+      <div class="product-modal__gallery">
+        <div class="main-image">
+          <img id="product-main-image" src="" alt="Основное изображение товара">
+        </div>
+        <div class="thumbnails"></div>
+      </div>
+      
+      <div class="product-modal__info">
+        <h2 id="product-modal-title" class="product-title"></h2>
+        <div class="product-price" id="product-modal-price"></div>
+        <div class="product-category" id="product-modal-category"></div>
+        <p class="product-description" id="product-modal-description"></p>
+        
+        <div class="product-sizes">
+          <h3>Размеры:</h3>
+          <div class="size-options" id="product-size-options"></div>
+        </div>
+        
+        <div class="product-colors">
+          <h3>Цвета:</h3>
+          <div class="color-options" id="product-color-options"></div>
+        </div>
+        
+        <div class="product-actions">
+          <div class="quantity-selector">
+            <button class="quantity-btn" data-action="decrease" aria-label="Уменьшить количество">-</button>
+            <input type="number" class="quantity-input" value="1" min="1" max="99">
+            <button class="quantity-btn" data-action="increase">+</button>
+          </div>
+          <button class="btn btn--primary add-to-cart">Добавить в корзину</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

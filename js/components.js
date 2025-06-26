@@ -10,6 +10,7 @@ export async function loadComponents() {
       loadComponent('header', './partials/header.html'),
       loadComponent(COMPONENTS.authModal, './partials/auth-modal.html'),
       loadComponent(COMPONENTS.cartSidebar, './partials/cart-sidebar.html'),
+      loadComponent('product-modal', './partials/product-modal.html'),
       loadComponent('footer', './partials/footer.html')
     ]);
 
@@ -37,7 +38,7 @@ export async function loadComponent(id, path) {
     
     const html = await response.text();
     
-    if (id === COMPONENTS.authModal || id === COMPONENTS.cartSidebar) {
+    if (id === COMPONENTS.authModal || id === COMPONENTS.cartSidebar || id === COMPONENTS.productModal) {
       document.body.insertAdjacentHTML('beforeend', html);
       console.log(`Компонент ${id} успешно загружен`);
       return document.getElementById(id);

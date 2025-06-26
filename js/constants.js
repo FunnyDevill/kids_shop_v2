@@ -3,4 +3,5 @@ export const COMPONENTS = {
   footer: 'footer',
   authModal: 'auth-modal',
   cartSidebar: 'cart-sidebar',
+  productModal: 'product-modal'
 }

@@ -95,13 +95,11 @@ class App {
         this.closeAllModals();
       }
 
-      //обрабочик кнопри перехода к коллекции
       if (e.target.closest('.btn-large') && e.target.closest('.hero')) {
          e.preventDefault();
          this.scrollToProducts();
       }
 
-      // Обработчик добавления в корзину
       if (e.target.closest('.add-to-cart')) {
         e.preventDefault();
         const productId = e.target.closest('.add-to-cart').dataset.id;
@@ -112,6 +110,16 @@ class App {
           this.handleAddToCartEvent(product);
         }
       }
+
+      if (e.target.closest('.product-card')) {
+        e.preventDefault();
+        const productCard = e.target.closest('.product-card');
+        const productId = parseInt(productCard.dataset.id);
+        const product = productModule.getProductById(productId);
+        if (product) {
+          this.showProductModal(product);
+        }
+      }
     });
 
     document.addEventListener('keydown', (e) => {
@@ -120,13 +128,54 @@ class App {
   }
 
   scrollToProducts() {
-  const productsSection = document.getElementById('products');
-  if (productsSection) {
-    productsSection.scrollIntoView({
-      behavior: 'smooth'
-    });
+    const productsSection = document.getElementById('products');
+    if (productsSection) {
+      productsSection.scrollIntoView({
+        behavior: 'smooth'
+      });
+    }
   }
-}
+
+  showProductModal(product) {
+    const modal = document.getElementById('product-modal');
+    console.log('Открытие модального окна для товара:', product);
+    if (!modal) {
+       console.error('Модальное окно товара не найдено');
+       return;
+    }
+
+    document.getElementById('product-modal-title').textContent = product.name;
+    document.getElementById('product-modal-price').textContent = `${product.price.toLocaleString()} ₽`;
+    document.getElementById('product-modal-category').textContent = product.category;
+    document.getElementById('product-modal-description').textContent = product.description;
+  
+    const mainImage = document.getElementById('product-main-image');
+    mainImage.src = product.image;
+    mainImage.alt = product.name;
+
+    const sizeOptions = document.getElementById('product-size-options');
+    sizeOptions.innerHTML = '';
+    product.sizes.forEach(size => {
+      const sizeElement = document.createElement('div');
+      sizeElement.className = 'size-option';
+      sizeElement.textContent = size;
+      sizeOptions.appendChild(sizeElement);
+    });
+
+    const colorOptions = document.getElementById('product-color-options');
+    colorOptions.innerHTML = '';
+    product.colors.forEach(color => {
+      const colorElement = document.createElement('div');
+      colorElement.className = 'color-option';
+      colorElement.style.backgroundColor = color;
+      colorOptions.appendChild(colorElement);
+    });
+
+    modal.setAttribute('aria-hidden', 'false');
+    document.querySelector('.overlay').classList.add('active');
+    document.body.classList.add('no-scroll');
+    this.currentModal = COMPONENTS.productModal;
+  }
 
   handleAddToCartEvent(product) {
     if (!product || !this.cart) return;
@@ -181,14 +230,14 @@ class App {
 
   closeAllModals() {
     const authModal = document.getElementById(COMPONENTS.authModal);
-    if (authModal) {
-      authModal.setAttribute('aria-hidden', 'true');
-    }
+    if (authModal) authModal.setAttribute('aria-hidden', 'true');
 
     const cartSidebar = document.getElementById(COMPONENTS.cartSidebar);
-    if (cartSidebar) {
-      cartSidebar.classList.remove('open');
-    }
+    if (cartSidebar) cartSidebar.classList.remove('open');
+
+    const productModal = document.getElementById(COMPONENTS.productModal);
+    if (productModal) productModal.setAttribute('aria-hidden', 'true');
+
 
     const overlay = document.querySelector('.overlay');
     overlay?.classList.remove('active');
@@ -239,7 +288,7 @@ class App {
 }
 
 const application = new App();
-window.application = application; // Делаем доступным глобально
+window.application = application;
 
 document.addEventListener('DOMContentLoaded', () => {
   application.init().catch((error) => {
